@@ -86,8 +86,8 @@ def verify_otp(body: OTPRequest, response: Response, db: Session = Depends(get_d
         key="session_token",
         value=token,
         httponly=True,
-        samesite="lax",
-        secure=True,  # Required for production HTTPS
+        samesite="none",
+        secure=True,  # Required for production HTTPS with SameSite=None
         max_age=60 * 60 * 24,  # 24 hours
     )
 
@@ -127,7 +127,7 @@ def login(body: OTPRequest, response: Response, db: Session = Depends(get_db)):
         key="session_token",
         value=token,
         httponly=True,
-        samesite="lax",
+        samesite="none",
         secure=True,
         max_age=60 * 60 * 24,
     )
