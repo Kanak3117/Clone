@@ -17,7 +17,16 @@ def get_current_user(
 
     Returns the authenticated User or raises 401.
     """
-    token = request.cookies.get("session_token")
+    # Prefer Authorization header (Bearer token) for cross-domain clients.
+    auth_header = request.headers.get("authorization") or request.headers.get("Authorization")
+    token = None
+    if auth_header and auth_header.lower().startswith("bearer "):
+        token = auth_header.split(None, 1)[1].strip()
+
+    # Fallback to cookie for backward compatibility
+    if not token:
+        token = request.cookies.get("session_token")
+
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -45,7 +54,14 @@ def get_current_user_optional(
     request: Request, db: Session = Depends(get_db)
 ) -> User | None:
     """Extract and validate the session token. Returns None if invalid."""
-    token = request.cookies.get("session_token")
+    auth_header = request.headers.get("authorization") or request.headers.get("Authorization")
+    token = None
+    if auth_header and auth_header.lower().startswith("bearer "):
+        token = auth_header.split(None, 1)[1].strip()
+
+    if not token:
+        token = request.cookies.get("session_token")
+
     if not token:
         return None
 
