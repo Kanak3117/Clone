@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: signal-clone-api
+    env: python
+    plan: free
+    rootDir: backend
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: SECRET_KEY
+        value: "signal-clone-super-secret-key-2026"
+      - key: CORS_ORIGINS
+        value: "https://frontend-kappa-lac-47.vercel.app"
+      - key: FRONTEND_URL
+        value: "https://frontend-kappa-lac-47.vercel.app"
