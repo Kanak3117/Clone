@@ -25,6 +25,14 @@ class Settings(BaseSettings):
 
     # CORS
     FRONTEND_URL: str = "http://localhost:3000"
+    CORS_ORIGINS: str = "http://localhost:3000"
+
+    @property
+    def allowed_origins(self) -> list[str]:
+        origins = [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        if origins:
+            return origins
+        return [self.FRONTEND_URL]
 
 
 settings = Settings()
