@@ -97,7 +97,7 @@ def verify_otp(body: OTPRequest, response: Response, db: Session = Depends(get_d
     db.commit()
     db.refresh(user)
 
-    return AuthResponse(user=UserResponse.model_validate(user))
+    return AuthResponse(user=UserResponse.model_validate(user), token=token)
 
 
 @router.post("/login", response_model=AuthResponse)
@@ -137,7 +137,7 @@ def login(body: OTPRequest, response: Response, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-    return AuthResponse(user=UserResponse.model_validate(user))
+    return AuthResponse(user=UserResponse.model_validate(user), token=token)
 
 
 @router.post("/logout")

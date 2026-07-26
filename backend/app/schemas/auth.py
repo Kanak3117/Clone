@@ -43,4 +43,5 @@ class UserResponse(BaseModel):
 class AuthResponse(BaseModel):
     """Response after successful OTP verification."""
     user: UserResponse
+    token: str = ""
     message: str = "Login successful"

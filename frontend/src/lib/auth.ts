@@ -3,10 +3,15 @@ import { User } from "../types";
 
 export const auth = {
     login: async (identifier: string, otp: string) => {
-        return fetchApi("/auth/login", {
+        const response = await fetchApi("/auth/login", {
             method: "POST",
             body: JSON.stringify({ identifier, otp })
         });
+        // Store token in localStorage
+        if (response?.token && typeof window !== 'undefined') {
+            localStorage.setItem('token', response.token);
+        }
+        return response;
     },
 
     register: async (username: string, display_name: string, phone_number?: string, avatar_url?: string) => {
@@ -17,13 +22,21 @@ export const auth = {
     },
 
     verifyOtp: async (identifier: string, otp: string) => {
-        return fetchApi("/auth/verify-otp", {
+        const response = await fetchApi("/auth/verify-otp", {
             method: "POST",
             body: JSON.stringify({ identifier, otp })
         });
+        // Store token in localStorage
+        if (response?.token && typeof window !== 'undefined') {
+            localStorage.setItem('token', response.token);
+        }
+        return response;
     },
 
     logout: async () => {
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('token');
+        }
         return fetchApi("/auth/logout", {
             method: "POST"
         });

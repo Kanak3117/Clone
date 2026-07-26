@@ -21,10 +21,16 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
         headers.set('Content-Type', 'application/json');
     }
 
+    // Add Authorization header with JWT token
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+    }
+
     const res = await fetch(url, {
         ...options,
         headers,
-        credentials: "include", // Always include cookies
+        credentials: "include",
     });
 
     if (!res.ok) {
@@ -42,12 +48,9 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
         if (res.status === 401 && typeof window !== 'undefined') {
             const path = window.location.pathname;
             if (!path.startsWith('/login') && !path.startsWith('/register')) {
-                // Best effort to clear the cookie, then hard redirect
-                fetch(`${API_BASE_URL}/auth/logout`, { method: 'POST', credentials: 'include' })
-                    .catch(() => {})
-                    .finally(() => {
-                        window.location.href = '/login';
-                    });
+                // Clear the token
+                localStorage.removeItem('token');
+                window.location.href = '/login';
             }
         }
 
