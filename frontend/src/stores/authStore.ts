@@ -23,7 +23,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         try {
             const user = await auth.getMe();
             set({ user, isAuthenticated: true, isLoading: false });
-        } catch (error) {
+        } catch {
             set({ user: null, isAuthenticated: false, isLoading: false });
         }
     },
@@ -31,7 +31,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     logout: async () => {
         try {
             await auth.logout();
-        } catch (error) {
+        } catch {
             // Ignore logout errors (e.g. already unauthenticated)
         } finally {
             set({ user: null, isAuthenticated: false });

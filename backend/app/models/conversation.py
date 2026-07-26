@@ -15,6 +15,7 @@ class Conversation(Base):
     type = Column(String(10), nullable=False)  # "direct" or "group"
     name = Column(String(100), nullable=True)  # Group name; null for direct chats
     avatar_url = Column(String(500), nullable=True)
+    chat_color = Column(String(50), nullable=True)
     created_by = Column(
         String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )

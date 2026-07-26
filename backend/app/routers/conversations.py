@@ -18,6 +18,7 @@ from app.schemas.conversation import (
     ConversationDetail,
     ConversationListItem,
     ConversationUpdate,
+    ConversationColorUpdate,
     LastMessageInfo,
     MemberAdd,
     ParticipantInfo,
@@ -151,6 +152,7 @@ def list_conversations(
                 type=conv.type,
                 name=display_name,
                 avatar_url=conv.avatar_url,
+                chat_color=conv.chat_color,
                 created_by=conv.created_by,
                 updated_at=conv.updated_at,
                 last_message=_get_last_message(db, conv.id),
@@ -219,6 +221,7 @@ def create_conversation(
                     type=conv.type,
                     name=conv.name,
                     avatar_url=conv.avatar_url,
+                    chat_color=conv.chat_color,
                     created_by=conv.created_by,
                     created_at=conv.created_at,
                     updated_at=conv.updated_at,
@@ -257,6 +260,7 @@ def create_conversation(
         type=conversation.type,
         name=conversation.name,
         avatar_url=conversation.avatar_url,
+        chat_color=conversation.chat_color,
         created_by=conversation.created_by,
         created_at=conversation.created_at,
         updated_at=conversation.updated_at,
@@ -298,6 +302,7 @@ def get_conversation(
         type=conv.type,
         name=conv.name,
         avatar_url=conv.avatar_url,
+        chat_color=conv.chat_color,
         created_by=conv.created_by,
         created_at=conv.created_at,
         updated_at=conv.updated_at,
@@ -337,6 +342,9 @@ def update_conversation(
     if body.avatar_url is not None:
         conv.avatar_url = body.avatar_url
 
+    if body.chat_color is not None:
+        conv.chat_color = body.chat_color
+
     conv.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(conv)
@@ -346,6 +354,49 @@ def update_conversation(
         type=conv.type,
         name=conv.name,
         avatar_url=conv.avatar_url,
+        chat_color=conv.chat_color,
+        created_by=conv.created_by,
+        created_at=conv.created_at,
+        updated_at=conv.updated_at,
+        participants=_get_participant_info(db, conv.id),
+    )
+
+
+@router.patch("/{conversation_id}/color", response_model=ConversationDetail)
+def update_conversation_color(
+    conversation_id: str,
+    body: ConversationColorUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update conversation chat color."""
+    conv = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    participant = (
+        db.query(ConversationParticipant)
+        .filter(
+            ConversationParticipant.conversation_id == conversation_id,
+            ConversationParticipant.user_id == current_user.id,
+        )
+        .first()
+    )
+    if not participant:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    conv.chat_color = body.color
+    conv.updated_at = datetime.now(timezone.utc)
+    
+    db.commit()
+    db.refresh(conv)
+
+    return ConversationDetail(
+        id=conv.id,
+        type=conv.type,
+        name=conv.name,
+        avatar_url=conv.avatar_url,
+        chat_color=conv.chat_color,
         created_by=conv.created_by,
         created_at=conv.created_at,
         updated_at=conv.updated_at,

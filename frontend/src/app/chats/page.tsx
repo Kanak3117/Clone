@@ -3,11 +3,11 @@ import { MessageSquareOff } from 'lucide-react';
 
 export default function ChatsEmptyState() {
     return (
-        <div className="flex-1 flex flex-col items-center justify-center bg-white dark:bg-[#121212] h-full">
-            <div className="text-gray-300 dark:text-gray-700 mb-4">
-                <MessageSquareOff className="w-24 h-24" strokeWidth={1} />
+        <div className="flex-1 flex flex-col items-center justify-center bg-[var(--bg-primary)] h-full">
+            <div className="text-[var(--text-secondary)] opacity-50 mb-4">
+                <MessageSquareOff className="w-24 h-24" />
             </div>
-            <h2 className="text-xl font-medium text-gray-500 dark:text-gray-400">
+            <h2 className="text-xl font-medium text-[var(--text-secondary)]">
                 Select a chat to start messaging
             </h2>
         </div>

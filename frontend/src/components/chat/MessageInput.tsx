@@ -89,12 +89,12 @@ export function MessageInput({ conversationId }: MessageInputProps) {
     };
 
     return (
-        <div className="p-4 bg-gray-50 dark:bg-[#1e1e1e] flex items-center gap-3">
-            <button onClick={() => alert('Feature coming soon!')} className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors" title="Emojis">
-                <Smile className="w-6 h-6" />
+        <div className="p-3 bg-[var(--bg-primary)] flex items-center gap-2 border-t border-[var(--border-line)] shadow-[0_-2px_10px_rgba(0,0,0,0.02)] z-10 relative">
+            <button onClick={() => alert('Feature coming soon!')} className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--hover-tint)] rounded-full transition-colors" title="Emojis">
+                <Smile className="w-5 h-5" />
             </button>
-            <button onClick={() => alert('Feature coming soon!')} className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors" title="Attachments">
-                <Paperclip className="w-6 h-6" />
+            <button onClick={() => alert('Feature coming soon!')} className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--hover-tint)] rounded-full transition-colors" title="Attachments">
+                <Paperclip className="w-5 h-5" />
             </button>
             
             <div className="flex-1 relative">
@@ -104,22 +104,25 @@ export function MessageInput({ conversationId }: MessageInputProps) {
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
                     placeholder="Signal message"
-                    className="w-full bg-white dark:bg-[#2c2c2c] border border-gray-200 dark:border-gray-700 rounded-full py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 shadow-sm"
+                    className="w-full bg-[var(--surface)] text-[var(--text-primary)] border border-transparent rounded-full py-2 px-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--signal-blue)] transition-all shadow-inner"
                 />
             </div>
 
-            {content.trim() ? (
-                <button 
-                    onClick={handleSend}
-                    className="p-2.5 bg-[#3A76F0] hover:bg-[#3266d6] text-white rounded-full transition-colors shadow-sm"
-                >
+            <button 
+                onClick={content.trim() ? handleSend : () => alert('Feature coming soon!')}
+                className={`p-2.5 rounded-full transition-all duration-200 shadow-sm flex items-center justify-center active:scale-95 ${
+                    content.trim() 
+                    ? 'bg-[var(--signal-blue)] text-white hover:opacity-90' 
+                    : 'bg-[var(--surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                }`}
+                title={content.trim() ? "Send Message" : "Voice Message"}
+            >
+                {content.trim() ? (
                     <Send className="w-5 h-5 ml-0.5" />
-                </button>
-            ) : (
-                <button onClick={() => alert('Feature coming soon!')} className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors" title="Voice Message">
-                    <Mic className="w-6 h-6" />
-                </button>
-            )}
+                ) : (
+                    <Mic className="w-5 h-5" />
+                )}
+            </button>
         </div>
     );
 }

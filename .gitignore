@@ -1,0 +1,12 @@
+# Python bytecode
+*.pyc
+__pycache__/
+
+# Environments
+.env
+
+# Database
+signal.db
+
+# Node dependencies
+node_modules/

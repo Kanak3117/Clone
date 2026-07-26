@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_current_user
+from app.core.deps import get_current_user, get_current_user_optional
 from app.core.security import create_access_token, create_ws_token
 from app.database import get_db
 from app.models.user import User
@@ -143,13 +143,14 @@ def login(body: OTPRequest, response: Response, db: Session = Depends(get_db)):
 @router.post("/logout")
 def logout(
     response: Response,
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_current_user_optional),
     db: Session = Depends(get_db),
 ):
     """Clear the session cookie and set user offline."""
-    current_user.is_online = False
-    current_user.last_seen = datetime.now(timezone.utc)
-    db.commit()
+    if current_user:
+        current_user.is_online = False
+        current_user.last_seen = datetime.now(timezone.utc)
+        db.commit()
 
     response.delete_cookie("session_token")
     return {"detail": "Logged out successfully"}

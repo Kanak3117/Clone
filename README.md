@@ -15,6 +15,11 @@ This project implements core messaging features including real-time text chat, g
   - Live unified search for existing conversations and global contacts
   - Avatar picker during onboarding and profile settings
   - Delivery and read receipts via WebSocket
+- **Advanced UI & UX Fidelity:**
+  - **Per-Chat Custom Colors**: Choose from curated Signal palettes to customize individual direct or group chats.
+  - **Deterministic Avatar Hashing**: Automatically assigns users without avatars a consistent, exact Signal palette color based on their ID.
+  - **Micro-Interactions**: Smooth FLIP animations for list reordering, scale transitions for unread badges, and hover reveals for message metadata.
+  - **Signal UI Precision**: Accurately modeled chat bubbles with context-aware tail corners, date separators, unified focus rings, and strict adherence to a flat, restrained design system.
 
 ---
 

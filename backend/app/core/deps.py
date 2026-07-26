@@ -40,3 +40,18 @@ def get_current_user(
         )
 
     return user
+
+def get_current_user_optional(
+    request: Request, db: Session = Depends(get_db)
+) -> User | None:
+    """Extract and validate the session token. Returns None if invalid."""
+    token = request.cookies.get("session_token")
+    if not token:
+        return None
+
+    try:
+        user_id = verify_token(token)
+    except jwt.PyJWTError:
+        return None
+
+    return db.query(User).filter(User.id == user_id).first()

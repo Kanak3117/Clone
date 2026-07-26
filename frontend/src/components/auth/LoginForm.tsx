@@ -126,12 +126,12 @@ export function LoginForm() {
             </CardContent>
             {step === 1 && (
                 <CardFooter className="flex justify-center">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Don't have an account?{' '}
-                        <Link href="/register" className="text-[#3A76F0] hover:underline font-medium">
+                    <div className="text-center text-sm mt-4 text-gray-500">
+                        Don&apos;t have an account?{' '}
+                        <Link href="/register" className="text-[#3A76F0] hover:underline">
                             Register
                         </Link>
-                    </p>
+                    </div>
                 </CardFooter>
             )}
         </Card>

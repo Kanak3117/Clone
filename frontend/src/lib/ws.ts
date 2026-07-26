@@ -9,12 +9,13 @@ export class WSClient {
     private reconnectAttempts = 0;
     private maxReconnectDelay = 30000;
     public status: 'connecting' | 'connected' | 'disconnected' = 'disconnected';
+    private statusListeners: Set<(status: string) => void> = new Set();
 
     constructor() {}
 
     public async connect() {
         if (this.status === 'connecting' || this.status === 'connected') return;
-        this.status = 'connecting';
+        this.setStatus('connecting');
 
         try {
             // Get short-lived token
@@ -25,7 +26,7 @@ export class WSClient {
             this.ws = new WebSocket(`${wsUrl}?token=${res.token}`);
 
             this.ws.onopen = () => {
-                this.status = 'connected';
+                this.setStatus('connected');
                 this.reconnectAttempts = 0;
                 console.log("WebSocket connected");
             };
@@ -40,7 +41,7 @@ export class WSClient {
             };
 
             this.ws.onclose = () => {
-                this.status = 'disconnected';
+                this.setStatus('disconnected');
                 this.ws = null;
                 this.scheduleReconnect();
             };
@@ -52,7 +53,7 @@ export class WSClient {
 
         } catch (error) {
             console.error("WebSocket connection failed", error);
-            this.status = 'disconnected';
+            this.setStatus('disconnected');
             this.scheduleReconnect();
         }
     }
@@ -64,7 +65,7 @@ export class WSClient {
         setTimeout(() => this.connect(), delay);
     }
 
-    public send(data: any) {
+    public send(data: Record<string, unknown>) {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify(data));
         } else {
@@ -77,8 +78,19 @@ export class WSClient {
         return () => this.handlers.delete(handler); // unsubscribe function
     }
 
+    public onStatusChange(handler: (status: string) => void) {
+        this.statusListeners.add(handler);
+        handler(this.status);
+        return () => this.statusListeners.delete(handler);
+    }
+
+    private setStatus(newStatus: 'connecting' | 'connected' | 'disconnected') {
+        this.status = newStatus;
+        this.statusListeners.forEach(h => h(this.status));
+    }
+
     public disconnect() {
-        this.status = 'disconnected';
+        this.setStatus('disconnected');
         if (this.ws) {
             this.ws.close();
             this.ws = null;

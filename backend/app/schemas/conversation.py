@@ -16,6 +16,12 @@ class ConversationUpdate(BaseModel):
     """PATCH /conversations/{id} request body."""
     name: str | None = Field(None, max_length=100)
     avatar_url: str | None = None
+    chat_color: str | None = None
+
+
+class ConversationColorUpdate(BaseModel):
+    """PATCH /conversations/{id}/color request body."""
+    color: str | None = None
 
 
 class MemberAdd(BaseModel):
@@ -51,6 +57,7 @@ class ConversationListItem(BaseModel):
     type: str
     name: str | None = None
     avatar_url: str | None = None
+    chat_color: str | None = None
     created_by: str | None = None
     updated_at: datetime
     last_message: LastMessageInfo | None = None
@@ -64,6 +71,7 @@ class ConversationDetail(BaseModel):
     type: str
     name: str | None = None
     avatar_url: str | None = None
+    chat_color: str | None = None
     created_by: str | None = None
     created_at: datetime
     updated_at: datetime

@@ -28,15 +28,29 @@ export interface ConversationParticipant {
     user?: User;
 }
 
+export interface ParticipantInfo {
+    id: string;
+    user_id: string;
+    role: string;
+    joined_at: string;
+    display_name: string;
+    username: string;
+    avatar_url?: string | null;
+    is_online: boolean;
+    last_seen?: string | null;
+}
+
 export interface Conversation {
     id: string;
     type: "direct" | "group";
     name?: string | null;
     avatar_url?: string | null;
+    chat_color?: string | null;
     created_by: string;
     created_at: string;
     updated_at: string;
-    participants: User[]; // Simplified for list view
+    participants: ParticipantInfo[];
+    unread_count?: number;
 }
 
 export interface MessageSender {
@@ -44,6 +58,12 @@ export interface MessageSender {
     display_name: string;
     avatar_url?: string | null;
     username: string;
+}
+
+export interface MessageStatusInfo {
+    user_id: string;
+    status: string;
+    updated_at?: string;
 }
 
 export interface Message {
@@ -55,7 +75,7 @@ export interface Message {
     created_at: string;
     sender: MessageSender;
     client_status?: "sending" | "failed"; // For optimistic UI
-    statuses?: MessageStatus[];
+    statuses?: MessageStatusInfo[];
 }
 
 export interface MessageStatus {

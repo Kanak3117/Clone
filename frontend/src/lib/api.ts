@@ -2,9 +2,9 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost
 
 export class APIError extends Error {
     public status: number;
-    public detail: string | Record<string, any>;
+    public detail: string | Record<string, unknown>;
 
-    constructor(status: number, detail: string | Record<string, any>) {
+    constructor(status: number, detail: string | Record<string, unknown>) {
         const message = typeof detail === 'string' ? detail : JSON.stringify(detail);
         super(message);
         this.status = status;
@@ -34,9 +34,23 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
             if (data.detail) {
                 detail = data.detail;
             }
-        } catch (e) {
+        } catch {
             // Ignored
         }
+
+        // Global 401 interceptor to auto-logout stale sessions
+        if (res.status === 401 && typeof window !== 'undefined') {
+            const path = window.location.pathname;
+            if (!path.startsWith('/login') && !path.startsWith('/register')) {
+                // Best effort to clear the cookie, then hard redirect
+                fetch(`${API_BASE_URL}/auth/logout`, { method: 'POST', credentials: 'include' })
+                    .catch(() => {})
+                    .finally(() => {
+                        window.location.href = '/login';
+                    });
+            }
+        }
+
         throw new APIError(res.status, detail);
     }
 
@@ -47,7 +61,7 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
 
     try {
         return await res.json();
-    } catch (e) {
+    } catch {
         return null;
     }
 }

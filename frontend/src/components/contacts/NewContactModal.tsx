@@ -5,10 +5,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { fetchApi } from '@/lib/api';
-import { useChatStore } from '@/stores/chatStore';
 import { User } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Search } from 'lucide-react';
+import { getAvatarColorClass, getInitials } from '@/lib/avatar';
 
 interface NewContactModalProps {
     open: boolean;
@@ -16,7 +16,6 @@ interface NewContactModalProps {
 }
 
 export function NewContactModal({ open, onOpenChange }: NewContactModalProps) {
-    const { fetchConversations, setActiveConversation } = useChatStore();
     const [search, setSearch] = useState('');
     const [results, setResults] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -33,10 +32,7 @@ export function NewContactModal({ open, onOpenChange }: NewContactModalProps) {
     }, [open]);
 
     useEffect(() => {
-        if (!search.trim()) {
-            setResults([]);
-            return;
-        }
+        if (!search.trim()) return;
         
         const delay = setTimeout(async () => {
             try {
@@ -49,24 +45,21 @@ export function NewContactModal({ open, onOpenChange }: NewContactModalProps) {
         return () => clearTimeout(delay);
     }, [search]);
 
-    const handleStartChat = async () => {
+    const handleAddContact = async () => {
         if (!selectedUser) return;
         setIsLoading(true);
         setError('');
         try {
-            const response = await fetchApi('/conversations', {
+            await fetchApi('/contacts', {
                 method: 'POST',
                 body: JSON.stringify({ 
-                    type: 'direct',
-                    participant_ids: [selectedUser.id] 
+                    contact_user_id: selectedUser.id 
                 })
             });
             
-            await fetchConversations();
-            setActiveConversation(response.id);
             onOpenChange(false);
         } catch (e: any) {
-            setError(e.message || "Failed to start chat");
+            setError(e.message || "Failed to add contact");
         } finally {
             setIsLoading(false);
         }
@@ -74,60 +67,66 @@ export function NewContactModal({ open, onOpenChange }: NewContactModalProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[400px] rounded-2xl p-6">
+            <DialogContent className="sm:max-w-[400px] rounded-2xl p-6 bg-[var(--bg-primary)] border-[var(--border-line)]">
                 <DialogHeader>
-                    <DialogTitle>New Chat</DialogTitle>
-                    <DialogDescription>Search for a user to start chatting.</DialogDescription>
+                    <DialogTitle className="text-[var(--text-primary)]">Add New Contact</DialogTitle>
+                    <DialogDescription className="text-[var(--text-secondary)]">Search for a user to add to your contacts.</DialogDescription>
                 </DialogHeader>
 
                 {error && <p className="text-sm text-red-500">{error}</p>}
 
                 <div className="space-y-4 py-4">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] w-4 h-4" />
                         <Input
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSearch(val);
+                                if (!val.trim()) setResults([]);
+                            }}
                             placeholder="Search by name or username"
                             autoComplete="off"
-                            className="pl-9"
+                            className="pl-9 bg-[var(--surface)] border-none focus-visible:ring-2 focus-visible:ring-[var(--signal-blue)] focus-visible:ring-offset-0 text-[var(--text-primary)]"
                         />
                     </div>
                     
-                    <div className="max-h-60 overflow-y-auto space-y-2">
+                    <div className="max-h-60 overflow-y-auto space-y-2 scrollbar-thin">
                         {results.map(user => (
                             <div 
                                 key={user.id} 
                                 onClick={() => setSelectedUser(user)}
                                 className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
                                     selectedUser?.id === user.id 
-                                        ? 'bg-[#3A76F0]/10 border border-[#3A76F0]' 
-                                        : 'hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent'
+                                        ? 'bg-[var(--active-tint)] ring-2 ring-[var(--signal-blue)]' 
+                                        : 'hover:bg-[var(--hover-tint)] ring-2 ring-transparent'
                                 }`}
                             >
                                 <Avatar className="h-10 w-10">
                                     <AvatarImage src={user.avatar_url || ''} />
-                                    <AvatarFallback>{user.display_name.charAt(0).toUpperCase()}</AvatarFallback>
+                                    <AvatarFallback className={`text-white ${getAvatarColorClass(user.id)}`}>
+                                        {getInitials(user.display_name)}
+                                    </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-medium text-sm">{user.display_name}</p>
-                                    <p className="text-xs text-gray-500">@{user.username}</p>
+                                    <p className="font-medium text-[var(--text-primary)] text-sm">{user.display_name}</p>
+                                    <p className="text-xs text-[var(--text-secondary)]">@{user.username}</p>
                                 </div>
                             </div>
                         ))}
                         {search && results.length === 0 && (
-                            <p className="text-center text-sm text-gray-500 py-4">No users found</p>
+                            <p className="text-center text-sm text-[var(--text-secondary)] py-4">No users found</p>
                         )}
                     </div>
                 </div>
 
                 <DialogFooter>
                     <Button 
-                        onClick={handleStartChat} 
+                        onClick={handleAddContact} 
                         disabled={!selectedUser || isLoading} 
-                        className="bg-[#3A76F0] hover:bg-[#3266d6] text-white rounded-full px-6"
+                        className="bg-[var(--signal-blue)] hover:bg-[var(--signal-blue-hover)] text-white rounded-full px-6 active:scale-[0.98] transition-all"
                     >
-                        {isLoading ? 'Starting...' : 'Start Chat'}
+                        {isLoading ? 'Adding...' : 'Add Contact'}
                     </Button>
                 </DialogFooter>
             </DialogContent>
