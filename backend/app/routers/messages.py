@@ -176,8 +176,11 @@ def send_message(
     return _build_message_response(db, message)
 
 
+from app.ws.manager import manager
+import asyncio
+
 @router.post("/{conversation_id}/read")
-def mark_as_read(
+async def mark_as_read(
     conversation_id: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -196,16 +199,29 @@ def mark_as_read(
 
     now = datetime.now(timezone.utc)
 
-    # Update all message statuses for this user in this conversation
-    message_ids = (
+    # Find unread messages before updating
+    message_ids_query = (
         db.query(Message.id)
         .filter(Message.conversation_id == conversation_id)
     )
-    db.query(MessageStatus).filter(
-        MessageStatus.message_id.in_(message_ids),
+    
+    unread_statuses = db.query(MessageStatus).filter(
+        MessageStatus.message_id.in_(message_ids_query),
         MessageStatus.user_id == current_user.id,
         MessageStatus.status != "read",
-    ).update({"status": "read", "updated_at": now}, synchronize_session="fetch")
+    ).all()
+    
+    if not unread_statuses:
+        return {"detail": "Messages marked as read"}
+        
+    # Keep track of message IDs to broadcast
+    unread_msg_ids = [s.message_id for s in unread_statuses]
+
+    # Update all message statuses for this user in this conversation
+    db.query(MessageStatus).filter(
+        MessageStatus.message_id.in_(unread_msg_ids),
+        MessageStatus.user_id == current_user.id
+    ).update({"status": "read", "updated_at": now}, synchronize_session=False)
 
     # Update last_read_message_id to the latest message
     latest_msg = (
@@ -218,5 +234,28 @@ def mark_as_read(
         participant.last_read_message_id = latest_msg.id
 
     db.commit()
+
+    # Broadcast read status to the original senders
+    # We broadcast a general "messages:read" for the conversation to all other participants
+    other_participants = (
+        db.query(ConversationParticipant)
+        .filter(
+            ConversationParticipant.conversation_id == conversation_id,
+            ConversationParticipant.user_id != current_user.id,
+        )
+        .all()
+    )
+    
+    # We will send a WS event to let clients know this user read their messages
+    for p in other_participants:
+        for msg_id in unread_msg_ids:
+            payload = {
+                "type": "message:status",
+                "message_id": msg_id,
+                "user_id": current_user.id,
+                "status": "read",
+                "conversation_id": conversation_id,
+            }
+            await manager.send_to_user(p.user_id, payload)
 
     return {"detail": "Messages marked as read"}
