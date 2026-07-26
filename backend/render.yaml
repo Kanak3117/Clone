@@ -10,10 +10,8 @@ services:
       - key: PYTHON_VERSION
         value: "3.11"
       - key: SECRET_KEY
-        sync: false  # Set this in Render dashboard — use a strong random string
-      - key: DATABASE_URL
-        sync: false  # Set this in Render dashboard — use Render PostgreSQL or external DB
+        value: "signal-clone-super-secret-key-2026"
       - key: CORS_ORIGINS
-        value: "https://signal-clone.vercel.app"  # Update to your actual Vercel frontend URL
+        value: "https://frontend-kappa-lac-47.vercel.app"
       - key: FRONTEND_URL
-        value: "https://signal-clone.vercel.app"  # Update to your actual Vercel frontend URL
+        value: "https://frontend-kappa-lac-47.vercel.app"
