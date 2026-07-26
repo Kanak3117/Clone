@@ -34,5 +34,10 @@ class Settings(BaseSettings):
             return origins
         return [self.FRONTEND_URL]
 
+    @property
+    def is_production(self) -> bool:
+        """True when FRONTEND_URL is HTTPS (i.e. deployed, not localhost)."""
+        return self.FRONTEND_URL.startswith("https://")
+
 
 settings = Settings()

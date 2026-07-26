@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user, get_current_user_optional
+from app.config import settings
 from app.core.security import create_access_token, create_ws_token
 from app.database import get_db
 from app.models.user import User
@@ -86,8 +87,8 @@ def verify_otp(body: OTPRequest, response: Response, db: Session = Depends(get_d
         key="session_token",
         value=token,
         httponly=True,
-        samesite="none",
-        secure=True,  # Required for production HTTPS with SameSite=None
+        samesite="none" if settings.is_production else "lax",
+        secure=settings.is_production,
         max_age=60 * 60 * 24,  # 24 hours
     )
 
@@ -127,8 +128,8 @@ def login(body: OTPRequest, response: Response, db: Session = Depends(get_db)):
         key="session_token",
         value=token,
         httponly=True,
-        samesite="none",
-        secure=True,
+        samesite="none" if settings.is_production else "lax",
+        secure=settings.is_production,
         max_age=60 * 60 * 24,
     )
 
@@ -152,7 +153,11 @@ def logout(
         current_user.last_seen = datetime.now(timezone.utc)
         db.commit()
 
-    response.delete_cookie("session_token")
+    response.delete_cookie(
+        "session_token",
+        samesite="none" if settings.is_production else "lax",
+        secure=settings.is_production,
+    )
     return {"detail": "Logged out successfully"}
 
 

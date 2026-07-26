@@ -4,9 +4,22 @@ __pycache__/
 
 # Environments
 .env
+.env.*
+!.env.example
 
 # Database
-signal.db
+*.db
 
 # Node dependencies
 node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Vercel
+.vercel/
+
+# OS files
+.DS_Store
+Thumbs.db

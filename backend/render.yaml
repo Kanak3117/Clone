@@ -3,10 +3,17 @@ services:
     name: signal-clone-api
     env: python
     plan: free
+    rootDir: backend
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11
+        value: "3.11"
+      - key: SECRET_KEY
+        sync: false  # Set this in Render dashboard — use a strong random string
+      - key: DATABASE_URL
+        sync: false  # Set this in Render dashboard — use Render PostgreSQL or external DB
       - key: CORS_ORIGINS
-        value: https://your-frontend-domain.vercel.app
+        value: "https://signal-clone.vercel.app"  # Update to your actual Vercel frontend URL
+      - key: FRONTEND_URL
+        value: "https://signal-clone.vercel.app"  # Update to your actual Vercel frontend URL
