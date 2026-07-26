@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useChatStore } from '@/stores/chatStore';
 import { useAuthStore } from '@/stores/authStore';
 import { formatRelative } from 'date-fns';
+import { parseDate } from '@/lib/dateUtils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -76,7 +77,7 @@ export function ConversationList({ searchQuery }: ConversationListProps) {
 
     const handleStartGlobalChat = async (userId: string) => {
         try {
-            const conv = await createConversation({ type: 'direct', user_ids: [userId] });
+            const conv = await createConversation({ type: 'direct', participant_ids: [userId] });
             router.push(`/chats/${conv.id}`);
         } catch (e) {
             console.error("Failed to start conversation:", e);
@@ -115,10 +116,15 @@ export function ConversationList({ searchQuery }: ConversationListProps) {
                     const avatar = conv.avatar_url || otherUser?.avatar_url;
                     
                     const recentMsgs = messages[conv.id];
-                    const lastMsg = recentMsgs && recentMsgs.length > 0 ? recentMsgs[recentMsgs.length - 1] : null;
+                    let lastMsg = recentMsgs && recentMsgs.length > 0 ? recentMsgs[recentMsgs.length - 1] : null;
                     
-                    const timeStr = lastMsg ? formatRelative(new Date(lastMsg.created_at), new Date()) : 
-                                   formatRelative(new Date(conv.updated_at), new Date());
+                    // Fallback to the last_message provided by the backend if we haven't fetched messages yet
+                    if (!lastMsg && conv.last_message) {
+                        lastMsg = conv.last_message as any;
+                    }
+                    
+                    const timeStr = lastMsg ? formatRelative(parseDate(lastMsg.created_at), new Date()) : 
+                                   formatRelative(parseDate(conv.updated_at), new Date());
 
                     const unreadCount = conv.unread_count || 0;
                     const isUnread = !isActive && unreadCount > 0;

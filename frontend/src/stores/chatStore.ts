@@ -13,7 +13,7 @@ interface ChatState {
     fetchConversations: () => Promise<void>;
     fetchMessages: (conversationId: string) => Promise<void>;
     setActiveConversation: (id: string | null) => void;
-    createConversation: (params: { type: string, user_ids?: string[], group_name?: string }) => Promise<Conversation>;
+    createConversation: (params: { type: string, participant_ids?: string[], group_name?: string }) => Promise<Conversation>;
     
     handleIncomingMessage: (message: Message, tempId?: string) => void;
     handleMessageStatus: (messageId: string, conversationId: string, userId: string, status: string) => void;

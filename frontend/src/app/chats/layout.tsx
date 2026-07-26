@@ -36,7 +36,7 @@ export default function ChatsLayout({ children }: { children: React.ReactNode })
             const unsubscribe = wsClient.subscribe((event) => {
                 switch (event.type) {
                     case 'message:new':
-                        handleIncomingMessage(event.message);
+                        handleIncomingMessage(event.message, event.temp_id);
                         // Optional: move conversation to top
                         fetchConversations();
                         break;

@@ -10,11 +10,13 @@ import { MessageList } from '@/components/chat/MessageList';
 import { MessageInput } from '@/components/chat/MessageInput';
 
 interface ChatPageProps {
-    params: Promise<{ conversationId: string }>;
+    params: { conversationId: string } | Promise<{ conversationId: string }>;
 }
 
 export default function ChatPage({ params }: ChatPageProps) {
-    const { conversationId } = use(params);
+    // Safely unwrap params regardless of Next.js version
+    const resolvedParams = params instanceof Promise ? React.use(params) : params as { conversationId: string };
+    const conversationId = resolvedParams.conversationId;
     const { conversations, messages, typingUsers, setActiveConversation } = useChatStore();
     const { onlineUsers } = usePresenceStore();
     const { user: currentUser } = useAuthStore();

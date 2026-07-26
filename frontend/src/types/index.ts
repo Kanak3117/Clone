@@ -51,6 +51,14 @@ export interface Conversation {
     updated_at: string;
     participants: ParticipantInfo[];
     unread_count?: number;
+    last_message?: {
+        id: string;
+        content: string;
+        sender_id: string;
+        sender_name: string;
+        message_type: string;
+        created_at: string;
+    } | null;
 }
 
 export interface MessageSender {

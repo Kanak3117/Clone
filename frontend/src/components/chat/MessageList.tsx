@@ -5,6 +5,7 @@ import { Message } from '@/types';
 import { useAuthStore } from '@/stores/authStore';
 import { format, isToday, isYesterday } from 'date-fns';
 import { Clock, Check, CheckCheck, Smile } from 'lucide-react';
+import { parseDate } from '@/lib/dateUtils';
 
 interface MessageListProps {
     messages: Message[];
@@ -13,7 +14,7 @@ interface MessageListProps {
 }
 
 function formatDateSeparator(dateString: string) {
-    const date = new Date(dateString);
+    const date = parseDate(dateString);
     if (isToday(date)) return 'Today';
     if (isYesterday(date)) return 'Yesterday';
     return format(date, 'MMM d, yyyy');
@@ -55,8 +56,8 @@ export function MessageList({ messages, typingUsers, isLoading }: MessageListPro
                 const prevMsg = index > 0 ? messages[index - 1] : null;
                 const nextMsg = index < messages.length - 1 ? messages[index + 1] : null;
 
-                const msgDate = new Date(msg.created_at).toDateString();
-                const prevDate = prevMsg ? new Date(prevMsg.created_at).toDateString() : null;
+                const msgDate = parseDate(msg.created_at).toDateString();
+                const prevDate = prevMsg ? parseDate(prevMsg.created_at).toDateString() : null;
                 const showDateSeparator = msgDate !== prevDate;
 
                 if (msg.message_type === 'system') {
@@ -82,7 +83,7 @@ export function MessageList({ messages, typingUsers, isLoading }: MessageListPro
                 
                 // Grouping logic (reset group if separated by date or system message)
                 const isFirstInGroup = !prevMsg || prevMsg.sender_id !== msg.sender_id || prevMsg.message_type === 'system' || showDateSeparator;
-                const isLastInGroup = !nextMsg || nextMsg.sender_id !== msg.sender_id || nextMsg.message_type === 'system' || new Date(nextMsg.created_at).toDateString() !== msgDate;
+                const isLastInGroup = !nextMsg || nextMsg.sender_id !== msg.sender_id || nextMsg.message_type === 'system' || parseDate(nextMsg.created_at).toDateString() !== msgDate;
 
                 const marginTop = isFirstInGroup && !showDateSeparator ? 'mt-3' : 'mt-0.5';
                 const isNew = !initialIds.has(msg.id);
@@ -126,7 +127,7 @@ export function MessageList({ messages, typingUsers, isLoading }: MessageListPro
                                     {isLastInGroup && (
                                         <div className={`absolute bottom-1 right-2 flex items-center gap-1 opacity-80 ${isOwn ? 'text-blue-100' : 'text-[var(--text-secondary)]'}`}>
                                             <span className="text-[10px] font-medium leading-none">
-                                                {format(new Date(msg.created_at), 'HH:mm')}
+                                                {format(parseDate(msg.created_at), 'HH:mm')}
                                             </span>
                                             {isOwn && (
                                                 <span className={msg.statuses?.some(s => s.status === 'read') ? 'text-blue-300' : 'text-blue-100'}>
@@ -150,7 +151,7 @@ export function MessageList({ messages, typingUsers, isLoading }: MessageListPro
                             <div className={`absolute top-1/2 -translate-y-1/2 ${isOwn ? 'right-[100%] mr-2 flex-row-reverse' : 'left-[100%] ml-2 flex-row'} flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none`}>
                                 {!isLastInGroup && (
                                     <span className="text-[10px] text-[var(--text-secondary)] font-medium whitespace-nowrap bg-[var(--bg-primary)] px-1.5 py-0.5 rounded-full shadow-sm border border-[var(--border-line)]">
-                                        {format(new Date(msg.created_at), 'HH:mm')}
+                                        {format(parseDate(msg.created_at), 'HH:mm')}
                                     </span>
                                 )}
                                 <div className="w-6 h-6 rounded-full bg-[var(--surface)] shadow-sm border border-[var(--border-line)] flex items-center justify-center text-[var(--text-secondary)]">

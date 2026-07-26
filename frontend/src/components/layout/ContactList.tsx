@@ -52,7 +52,7 @@ export function ContactList() {
 
     const handleStartChat = async (userId: string) => {
         try {
-            const conv = await createConversation({ type: 'direct', user_ids: [userId] });
+            const conv = await createConversation({ type: 'direct', participant_ids: [userId] });
             router.push(`/chats/${conv.id}`);
         } catch (e) {
             console.error("Failed to start chat", e);

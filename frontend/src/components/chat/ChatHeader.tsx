@@ -7,6 +7,7 @@ import { formatRelative } from 'date-fns';
 import { GroupInfoModal } from './GroupInfoModal';
 import Link from 'next/link';
 import { getAvatarColorClass, getInitials } from '@/lib/avatar';
+import { parseDate } from '@/lib/dateUtils';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -39,7 +40,7 @@ interface ChatHeaderProps {
 
 export function ChatHeader({ conversationId, isGroup, displayName, avatarUrl, isOnline, lastSeen, chatColor }: ChatHeaderProps) {
     const [infoOpen, setInfoOpen] = useState(false);
-    const timeStr = lastSeen ? formatRelative(new Date(lastSeen), new Date()) : null;
+    const timeStr = lastSeen ? formatRelative(parseDate(lastSeen), new Date()) : null;
     const { updateChatColor } = useChatStore();
 
     return (
